@@ -6,25 +6,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual Environment
-venv/
-env/
-
-# Temporary files
-temp/
-assets/
-audio/
-
 # Logs
 *.log
 
-# IDE specific files
-.idea/
+# IDE
 .vscode/
-*.swp
-*.swo
-.DS_Store
-
-# API Keys and Secrets
-*.pem
-*.key
+.idea/
