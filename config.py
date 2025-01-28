@@ -18,6 +18,9 @@ NEWS_SOURCES = [
 NEWS_KEYWORDS = ['AI', 'artificial intelligence', 'music', 'generative ai']
 NEWS_SEARCH_PERIOD = '7d'  # Look for news from the last 7 days
 
+# OpenAI configuration
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 # Audio Configuration
 ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
 AUDIO_FORMAT = 'mp3'

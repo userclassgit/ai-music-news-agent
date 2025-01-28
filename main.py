@@ -2,9 +2,10 @@ import os
 import logging
 import time
 from datetime import datetime
+import openai
 from news_scraper import NewsScraper
 from audio_generator import AudioGenerator
-from config import TEMP_DIR
+from config import TEMP_DIR, OPENAI_API_KEY
 
 # Set up logging
 logging.basicConfig(
@@ -22,6 +23,7 @@ class AINewsBot:
     def __init__(self):
         self.news_scraper = NewsScraper()
         self.audio_generator = AudioGenerator()
+        openai.api_key = OPENAI_API_KEY
     
     def group_similar_articles(self, articles):
         """Group articles that are about the same story.
@@ -54,30 +56,36 @@ class AINewsBot:
         return grouped_articles
 
     def create_summary(self, articles):
-        """Create a comprehensive summary from multiple articles about the same story.
-        Includes attribution to original sources.
+        """Create an AI-generated summary from the most recent article.
+        Log other related articles as sources but don't include them in summary.
         """
-        # Use the most recent article's title for the summary
-        main_article = max(articles, key=lambda a: a.date)
-        logger.info(f"Using title from {main_article.source} (published {main_article.date})")
-        
-        # Get all sources with their dates
+        # Log all sources for reference
         sources = [f"{a.source} ({a.date})" for a in articles]
+        logger.info(f"Found {len(articles)} related articles from: {', '.join(sources)}")
         
-        # Create summary
-        summary = f"# {main_article.title}\n\n"
-        summary += f"Based on {len(articles)} sources: {', '.join(sources)}\n\n"
+        # Use the most recent article
+        main_article = max(articles, key=lambda a: a.date)
+        logger.info(f"Using article from {main_article.source} (published {main_article.date})")
         
-        # Add content from all articles, avoiding repetition
-        unique_paragraphs = set()
-        for article in articles:
-            for paragraph in article.content.split('\n'):
-                # Only add unique paragraphs
-                if paragraph.strip() and paragraph not in unique_paragraphs:
-                    unique_paragraphs.add(paragraph)
-        
-        summary += "\n".join(unique_paragraphs)
-        return summary
+        # Create AI summary using OpenAI
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a professional news summarizer. Create a clear, concise summary of the article that will be read aloud. Focus on the key points and maintain a natural, conversational tone. Do not mention sources or dates."},
+                    {"role": "user", "content": f"Title: {main_article.title}\n\nContent: {main_article.content}"}
+                ],
+                temperature=0.7,
+                max_tokens=250  # Limit summary length to control costs
+            )
+            summary = response.choices[0].message.content.strip()
+            logger.info("Successfully generated AI summary")
+            return summary
+            
+        except Exception as e:
+            logger.error(f"Error generating AI summary: {str(e)}")
+            # Fallback to using the article title if AI summarization fails
+            return main_article.title
 
     def run(self):
         """Main bot execution loop."""
@@ -101,10 +109,10 @@ class AINewsBot:
                 try:
                     logger.info(f"Processing story: {title} ({len(article_group)} articles)")
                     
-                    # Create a summary of all related articles
+                    # Create AI-generated summary from most recent article
                     summary = self.create_summary(article_group)
                     
-                    # Generate single audio file for the summary
+                    # Generate audio file for the summary
                     audio_path = self.audio_generator.process_article(summary)
                     logger.info(f"Audio generated: {audio_path}")
                     

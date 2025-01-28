@@ -4,3 +4,4 @@ python-dotenv>=1.0.0
 elevenlabs>=0.3.0
 beautifulsoup4>=4.12.2
 feedparser>=6.0.10
+openai
