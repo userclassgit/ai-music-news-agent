@@ -13,6 +13,7 @@ env/
 # Temporary files
 temp/
 assets/
+audio/
 
 # Logs
 *.log

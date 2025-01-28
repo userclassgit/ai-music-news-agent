@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Directory configuration
-ASSETS_DIR = 'assets'
-AUDIO_DIR = os.path.join(ASSETS_DIR, 'audio')
+AUDIO_DIR = "/Users/bruh/Desktop/AI news audio files"
 
 # Create necessary directories
 os.makedirs(AUDIO_DIR, exist_ok=True)
@@ -21,6 +20,3 @@ AUDIO_QUALITY = 'high'
 
 # File paths
 LOG_FILE = 'bot.log'
-
-# Create necessary directories
-os.makedirs(ASSETS_DIR, exist_ok=True)
