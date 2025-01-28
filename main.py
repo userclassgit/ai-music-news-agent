@@ -22,17 +22,7 @@ class AINewsBot:
     def __init__(self):
         self.news_scraper = NewsScraper()
         self.audio_generator = AudioGenerator()
-        
-    def clean_temp_files(self):
-        """Clean up temporary files."""
-        for filename in os.listdir(TEMP_DIR):
-            file_path = os.path.join(TEMP_DIR, filename)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                logger.error(f"Error deleting {file_path}: {str(e)}")
-
+    
     def group_similar_articles(self, articles):
         """Group articles that are about the same story.
         Returns a dictionary where:
@@ -93,7 +83,7 @@ class AINewsBot:
             
             # Get latest news articles
             articles = self.news_scraper.get_articles()
-            logger.info(f"Found {len(articles)} relevant articles")
+            logger.info(f"Found {len(articles)} articles")
             
             if not articles:
                 logger.info("No new articles found")
@@ -124,9 +114,7 @@ class AINewsBot:
             
         except Exception as e:
             logger.error(f"Bot execution error: {str(e)}")
-        
-        finally:
-            self.clean_temp_files()
+
 
 if __name__ == "__main__":
     bot = AINewsBot()
