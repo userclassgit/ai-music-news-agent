@@ -57,9 +57,12 @@ class AINewsBot:
         """Create a comprehensive summary from multiple articles about the same story.
         Includes attribution to original sources.
         """
-        # Extract key information
-        main_article = articles[0]  # Use first article as primary source
-        sources = [f"{a.source} ({a.published_date})" for a in articles]
+        # Use the most recent article's title for the summary
+        main_article = max(articles, key=lambda a: a.date)
+        logger.info(f"Using title from {main_article.source} (published {main_article.date})")
+        
+        # Get all sources with their dates
+        sources = [f"{a.source} ({a.date})" for a in articles]
         
         # Create summary
         summary = f"# {main_article.title}\n\n"
