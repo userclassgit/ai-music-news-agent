@@ -3,7 +3,7 @@ from pathlib import Path
 from elevenlabs import generate, save, set_api_key
 import logging
 from news_scraper import NewsArticle
-from config import TEMP_DIR, ELEVENLABS_API_KEY
+from config import AUDIO_DIR, ELEVENLABS_API_KEY
 
 class AudioGenerator:
     def __init__(self):
@@ -43,13 +43,13 @@ class AudioGenerator:
         """Process an article into audio news update."""
         try:
             # Create output directory if it doesn't exist
-            os.makedirs(TEMP_DIR, exist_ok=True)
+            os.makedirs(AUDIO_DIR, exist_ok=True)
             
             # Generate script
             script = self.create_script(article)
             
             # Generate audio file
-            output_path = os.path.join(TEMP_DIR, f"news_update_{article.title[:30]}.mp3")
+            output_path = os.path.join(AUDIO_DIR, f"news_update_{article.title[:30]}.mp3")
             self.generate_audio(script, output_path)
             
             return output_path
