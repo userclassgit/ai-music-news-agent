@@ -25,55 +25,14 @@ class AINewsBot:
         self.audio_generator = AudioGenerator()
         openai.api_key = OPENAI_API_KEY
     
-    def group_similar_articles(self, articles):
-        """Group articles that are about the same story.
-        Returns a dictionary where:
-        - key: A representative title for the group
-        - value: List of related articles
-        """
-        grouped_articles = {}
-        
-        for article in articles:
-            # Convert title to lowercase for better matching
-            title_words = set(word.lower() for word in article.title.split())
-            
-            matched = False
-            for group_key in list(grouped_articles.keys()):
-                group_words = set(word.lower() for word in group_key.split())
-                # Calculate similarity using word overlap
-                similarity = len(title_words & group_words) / len(title_words | group_words)
-                
-                # If titles are similar enough, add to existing group
-                if similarity > 0.5:  # 50% word overlap threshold
-                    grouped_articles[group_key].append(article)
-                    matched = True
-                    break
-            
-            # If no match found, create new group
-            if not matched:
-                grouped_articles[article.title] = [article]
-        
-        return grouped_articles
-
-    def create_summary(self, articles):
-        """Create an AI-generated summary from the most recent article.
-        Log other related articles as sources but don't include them in summary.
-        """
-        # Log all sources for reference
-        sources = [f"{a.source} ({a.date})" for a in articles]
-        logger.info(f"Found {len(articles)} related articles from: {', '.join(sources)}")
-        
-        # Use the most recent article
-        main_article = max(articles, key=lambda a: a.date)
-        logger.info(f"Using article from {main_article.source} (published {main_article.date})")
-        
-        # Create AI summary using OpenAI
+    def create_summary(self, article):
+        """Create an AI-generated summary from the article."""
         try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a professional news summarizer. Create a clear, concise summary of the article that will be read aloud. Focus on the key points and maintain a natural, conversational tone. Do not mention sources or dates."},
-                    {"role": "user", "content": f"Title: {main_article.title}\n\nContent: {main_article.content}"}
+                    {"role": "user", "content": f"Title: {article.title}\n\nContent: {article.content}"}
                 ],
                 temperature=0.7,
                 max_tokens=250  # Limit summary length to control costs
@@ -85,7 +44,7 @@ class AINewsBot:
         except Exception as e:
             logger.error(f"Error generating AI summary: {str(e)}")
             # Fallback to using the article title if AI summarization fails
-            return main_article.title
+            return article.title
 
     def run(self):
         """Main bot execution loop."""
@@ -94,25 +53,22 @@ class AINewsBot:
             
             # Get latest news articles
             articles = self.news_scraper.get_articles()
-            logger.info(f"Found {len(articles)} articles")
+            logger.info(f"Found {len(articles)} unique AI music articles")
             
             if not articles:
                 logger.info("No new articles found")
                 return
             
-            # Group similar articles
-            grouped_articles = self.group_similar_articles(articles)
-            logger.info(f"Grouped into {len(grouped_articles)} unique stories")
-            
-            # Process each group of articles
-            for title, article_group in grouped_articles.items():
+            # Process each unique article
+            for article in articles:
                 try:
-                    logger.info(f"Processing story: {title} ({len(article_group)} articles)")
+                    logger.info(f"Processing article: {article.title}")
+                    logger.info(f"Source: {article.source} (published {article.date})")
                     
-                    # Create AI-generated summary from most recent article
-                    summary = self.create_summary(article_group)
+                    # Create AI-generated summary
+                    summary = self.create_summary(article)
                     
-                    # Generate audio file for the summary
+                    # Generate audio file
                     audio_path = self.audio_generator.process_article(summary)
                     logger.info(f"Audio generated: {audio_path}")
                     
@@ -120,7 +76,7 @@ class AINewsBot:
                     time.sleep(2)
                     
                 except Exception as e:
-                    logger.error(f"Error processing story: {str(e)}")
+                    logger.error(f"Error processing article: {str(e)}")
                     continue
             
         except Exception as e:
