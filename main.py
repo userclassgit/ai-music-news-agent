@@ -33,6 +33,59 @@ class AINewsBot:
             except Exception as e:
                 logger.error(f"Error deleting {file_path}: {str(e)}")
 
+    def group_similar_articles(self, articles):
+        """Group articles that are about the same story.
+        Returns a dictionary where:
+        - key: A representative title for the group
+        - value: List of related articles
+        """
+        grouped_articles = {}
+        
+        for article in articles:
+            # Convert title to lowercase for better matching
+            title_words = set(word.lower() for word in article.title.split())
+            
+            matched = False
+            for group_key in list(grouped_articles.keys()):
+                group_words = set(word.lower() for word in group_key.split())
+                # Calculate similarity using word overlap
+                similarity = len(title_words & group_words) / len(title_words | group_words)
+                
+                # If titles are similar enough, add to existing group
+                if similarity > 0.5:  # 50% word overlap threshold
+                    grouped_articles[group_key].append(article)
+                    matched = True
+                    break
+            
+            # If no match found, create new group
+            if not matched:
+                grouped_articles[article.title] = [article]
+        
+        return grouped_articles
+
+    def create_summary(self, articles):
+        """Create a comprehensive summary from multiple articles about the same story.
+        Includes attribution to original sources.
+        """
+        # Extract key information
+        main_article = articles[0]  # Use first article as primary source
+        sources = [f"{a.source} ({a.published_date})" for a in articles]
+        
+        # Create summary
+        summary = f"# {main_article.title}\n\n"
+        summary += f"Based on {len(articles)} sources: {', '.join(sources)}\n\n"
+        
+        # Add content from all articles, avoiding repetition
+        unique_paragraphs = set()
+        for article in articles:
+            for paragraph in article.content.split('\n'):
+                # Only add unique paragraphs
+                if paragraph.strip() and paragraph not in unique_paragraphs:
+                    unique_paragraphs.add(paragraph)
+        
+        summary += "\n".join(unique_paragraphs)
+        return summary
+
     def run(self):
         """Main bot execution loop."""
         try:
@@ -46,20 +99,27 @@ class AINewsBot:
                 logger.info("No new articles found")
                 return
             
-            # Process each article
-            for article in articles:
+            # Group similar articles
+            grouped_articles = self.group_similar_articles(articles)
+            logger.info(f"Grouped into {len(grouped_articles)} unique stories")
+            
+            # Process each group of articles
+            for title, article_group in grouped_articles.items():
                 try:
-                    logger.info(f"Processing article: {article.title}")
+                    logger.info(f"Processing story: {title} ({len(article_group)} articles)")
                     
-                    # Generate audio
-                    audio_path = self.audio_generator.process_article(article)
-                    logger.info(f"Audio generated successfully: {audio_path}")
+                    # Create a summary of all related articles
+                    summary = self.create_summary(article_group)
+                    
+                    # Generate single audio file for the summary
+                    audio_path = self.audio_generator.process_article(summary)
+                    logger.info(f"Audio generated: {audio_path}")
                     
                     # Wait between processing to avoid rate limits
                     time.sleep(2)
                     
                 except Exception as e:
-                    logger.error(f"Error processing article: {str(e)}")
+                    logger.error(f"Error processing story: {str(e)}")
                     continue
             
         except Exception as e:
