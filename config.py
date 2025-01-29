@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Directory for audio files
-AUDIO_DIR = "/Users/bruh/Desktop/AI news audio files"
+AUDIO_DIR = "/Users/bruh/Desktop/AI music news audio"
 os.makedirs(AUDIO_DIR, exist_ok=True)
 
 # API Configuration
