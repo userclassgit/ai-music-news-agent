@@ -2,7 +2,7 @@ import os
 import logging
 import time
 from datetime import datetime
-import openai
+from openai import OpenAI
 import json
 from news_scraper import NewsScraper
 from audio_generator import AudioGenerator
@@ -24,7 +24,7 @@ class AINewsBot:
     def __init__(self):
         self.news_scraper = NewsScraper()
         self.audio_generator = AudioGenerator()
-        openai.api_key = OPENAI_API_KEY
+        self.client = OpenAI(api_key=OPENAI_API_KEY)
     
     def categorize_articles(self, articles):
         """Group articles into topics using LLM to analyze titles and previews only."""
@@ -42,7 +42,7 @@ class AINewsBot:
         ]
         
         try:
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": """You are a news categorizer. Group articles into topics based on their titles and previews.
@@ -85,7 +85,7 @@ class AINewsBot:
                     logger.error(f"Could not fetch full content for article: {article.title}")
                     return None
             
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a professional news summarizer. Create a clear, concise summary of the article that will be read aloud. Focus on the key points and maintain a natural, conversational tone. Do not mention sources."},

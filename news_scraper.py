@@ -28,13 +28,57 @@ class NewsScraper:
         text_lower = text.lower()
         return 'ai' in text_lower and 'music' in text_lower
     
+    def _parse_date(self, date_str: str) -> datetime:
+        """Parse date string from RSS feed."""
+        try:
+            # Remove timezone name (e.g., GMT) and parse
+            date_str = ' '.join(date_str.split()[:-1])
+            return datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S')
+        except Exception as e:
+            self.logger.error(f"Error parsing date: {str(e)}")
+            raise
+    
     def _extract_article_content(self, url: str) -> str:
         """Extract full article content using trafilatura."""
         try:
-            downloaded = trafilatura.fetch_url(url)
+            # Add headers to mimic a browser
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            # First, follow any redirects to get the final URL
+            response = requests.get(url, headers=headers, allow_redirects=True, timeout=10)
+            final_url = response.url
+            
+            # Try trafilatura first
+            downloaded = trafilatura.fetch_url(final_url)
             if downloaded:
-                return trafilatura.extract(downloaded)
-            return None
+                content = trafilatura.extract(downloaded)
+                if content:
+                    return content
+            
+            # Fallback: Try using requests and BeautifulSoup if trafilatura fails
+            soup = BeautifulSoup(response.text, 'lxml')
+            
+            # Remove script and style elements
+            for element in soup(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+                element.decompose()
+            
+            # Try to find the main article content
+            article = soup.find('article')
+            if article:
+                text = article.get_text(separator='\n\n')
+            else:
+                # If no article tag, try common content containers
+                content_div = soup.find(['div', 'main'], class_=lambda x: x and any(word in str(x).lower() for word in ['content', 'article', 'story', 'body']))
+                text = content_div.get_text(separator='\n\n') if content_div else soup.get_text(separator='\n\n')
+            
+            # Clean up the text
+            lines = [line.strip() for line in text.splitlines() if line.strip() and len(line.strip()) > 50]  # Only keep substantial lines
+            content = '\n\n'.join(lines)
+            
+            return content if content else None
+            
         except Exception as e:
             self.logger.error(f"Error extracting content from {url}: {str(e)}")
             return None
@@ -51,7 +95,7 @@ class NewsScraper:
             for entry in feed.entries:
                 try:
                     # Parse date
-                    pub_date = datetime.strptime(entry.published, '%a, %d %b %Y %H:%M:%S %z')
+                    pub_date = self._parse_date(entry.published)
                     if pub_date < cutoff_date:
                         continue
                     

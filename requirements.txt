@@ -1,7 +1,7 @@
 feedparser
 beautifulsoup4
 requests
-openai
+openai>=1.3.0
 python-dotenv
 elevenlabs>=0.3.0
 trafilatura

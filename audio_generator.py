@@ -1,13 +1,17 @@
 import os
 from pathlib import Path
-from elevenlabs import generate, save, set_api_key
+import requests
 import logging
 from config import AUDIO_DIR, ELEVENLABS_API_KEY
 
 class AudioGenerator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        set_api_key(ELEVENLABS_API_KEY)
+        self.headers = {
+            "Accept": "audio/mpeg",
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json"
+        }
     
     def process_article(self, summary: str) -> str:
         """Generate audio for the article summary."""
@@ -20,13 +24,24 @@ class AudioGenerator:
             filename = f"{filename}.mp3"
             output_path = os.path.join(AUDIO_DIR, filename)
             
-            # Generate and save audio
-            audio = generate(
-                text=summary,
-                voice="Josh",  # Professional male voice
-                model="eleven_monolingual_v1"
-            )
-            save(audio, output_path)
+            # Generate audio using ElevenLabs API
+            url = "https://api.elevenlabs.io/v1/text-to-speech/TxGEqnHWrfWFTfGW9XjX"  # Josh voice ID
+            
+            data = {
+                "text": summary,
+                "model_id": "eleven_monolingual_v1",
+                "voice_settings": {
+                    "stability": 0.5,
+                    "similarity_boost": 0.5
+                }
+            }
+            
+            response = requests.post(url, headers=self.headers, json=data)
+            response.raise_for_status()
+            
+            # Save the audio file
+            with open(output_path, "wb") as f:
+                f.write(response.content)
             
             self.logger.info(f"Audio saved to: {output_path}")
             return output_path

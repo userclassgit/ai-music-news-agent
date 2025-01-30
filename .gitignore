@@ -12,6 +12,9 @@ venv/
 # Logs
 *.log
 
+# macOS
+.DS_Store
+
 # IDE
 .vscode/
 .idea/
