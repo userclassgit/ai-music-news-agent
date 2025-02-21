@@ -6,4 +6,4 @@ This project is my attempt to build an AI agent that automatically generates aud
 3. Outputs ready-to-use audio files for video production
 
 I'm documenting this project on Notion:
-https://www.notion.so/mj-project-journal/AI-YouTube-Content-Creator-184c218ccd1880c7b608ceccc4f2cddc
+https://mj-project-journal.notion.site/AI-Content-Creator-184c218ccd1880c7b608ceccc4f2cddc

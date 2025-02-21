@@ -11,6 +11,7 @@ os.makedirs(AUDIO_DIR, exist_ok=True)
 # API Configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
 # Logging
 LOG_FILE = "bot.log"
