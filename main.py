@@ -108,7 +108,6 @@ Summarize the following articles about AI and music news. Important requirements
 4. No meta-references (don't say "This article...")
 5. One concise paragraph per relevant article
 6. Begin each summary directly with the news
-7. Skip any examples - analyze ONLY the articles provided below
 
 Articles to analyze:
 
