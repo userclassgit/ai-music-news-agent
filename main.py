@@ -184,5 +184,4 @@ Articles to analyze:
 
 if __name__ == "__main__":
     bot = AINewsBot()
-    # For testing, use test_prompt() instead of run()
-    bot.test_prompt()
+    bot.run()

@@ -13,7 +13,7 @@ class AudioGenerator:
             "Content-Type": "application/json"
         }
     
-    def process_article(self, summary: str) -> str:
+    def generate_audio(self, summary: str) -> str:
         """Generate audio for the article summary."""
         try:
             # Create output directory if it doesn't exist
@@ -25,7 +25,7 @@ class AudioGenerator:
             output_path = os.path.join(AUDIO_DIR, filename)
             
             # Generate audio using ElevenLabs API
-            url = "https://api.elevenlabs.io/v1/text-to-speech/TxGEqnHWrfWFTfGW9XjX"  # Josh voice ID
+            url = "https://api.elevenlabs.io/v1/text-to-speech/wViXBPUzp2ZZixB1xQuM"  # Bill Oxley voice ID
             
             data = {
                 "text": summary,
