@@ -1,9 +1,12 @@
 # AI Music News Audio Generator
 
-This project is my attempt to build an AI agent that automatically generates audio news content about AI and music. The agent:
-1. Scrapes news about AI and music from various sources
-2. Generates professional audio narration using ElevenLabs
-3. Outputs ready-to-use audio files for video production
+![**Audio Demo**](https://file.notion.so/f/f/02686ad4-1e38-4b1d-a1c7-c3057724c60e/bc6f3de5-1e7a-41d7-b920-ae5e6ad2680b/Spotify_is_expanding_its_AI_audiobook_narration_ca.mp3?table=block&id=1a2c218c-cd18-806c-b54b-df3e1cc4e18d&spaceId=02686ad4-1e38-4b1d-a1c7-c3057724c60e&expirationTimestamp=1740261600000&signature=D1hvsJjeHbmtW0kUKmG82bY2uXcKs6ft2mK3fJ4xWhw)
 
-I'm documenting this project on Notion:
+This AI agent autonomously
+1. gets links to news articles published in the past 2 days that are relevant to both AI and music through NewsAPI.
+2. scrapes the news content from each link.
+3. gives Gemini the scraped news content for summarization with additional instructions (professional tone, one paragraph per article, etc).
+4. uses ElevenLabs API to convert the summary into a single audio file that is ready to be edited and used in a YouTube video.
+
+I have documented the entire process of building this AI agent on this Notion page:
 https://mj-project-journal.notion.site/AI-Content-Creator-184c218ccd1880c7b608ceccc4f2cddc
