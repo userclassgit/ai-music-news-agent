@@ -5,6 +5,9 @@ import google.generativeai as genai
 from newsapi import NewsApiClient
 from audio_generator import AudioGenerator
 from config import AUDIO_DIR, GEMINI_API_KEY, NEWS_API_KEY
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 # Set up logging
 logging.basicConfig(
@@ -25,6 +28,37 @@ class AINewsBot:
         self.newsapi = NewsApiClient(api_key=NEWS_API_KEY)
         self.audio_generator = AudioGenerator()
     
+    def scrape_article_content(self, url):
+        """Scrape article content from URL."""
+        try:
+            # Don't scrape certain domains that block scraping
+            domain = urlparse(url).netloc
+            if any(blocked in domain for blocked in ['bloomberg.com', 'ft.com', 'wsj.com']):
+                return None
+
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Remove script and style elements
+            for script in soup(["script", "style"]):
+                script.decompose()
+                
+            # Get text content
+            text = soup.get_text(separator='\n', strip=True)
+            
+            # Basic cleaning
+            lines = [line.strip() for line in text.split('\n') if line.strip()]
+            text = '\n'.join(lines)
+            
+            return text[:5000]  # Limit content length
+            
+        except Exception as e:
+            logger.error(f"Error scraping {url}: {str(e)}")
+            return None
+
     def get_news_summary(self):
         """Get AI music news summary using NewsAPI and Gemini."""
         try:
@@ -39,39 +73,46 @@ class AINewsBot:
                 from_param=start_date.strftime('%Y-%m-%d'),
                 to=end_date.strftime('%Y-%m-%d'),
                 language='en',
-                sort_by='publishedAt',
-                page_size=100
+                sort_by='publishedAt'
             )
             
             if not articles['articles']:
                 logger.info("No articles found in the past 2 days")
                 return "No news about AI and music found in the past 2 days."
             
-            # Format articles for Gemini
-            articles_text = "\n\n".join(
-                f"Title: {article['title']}\n" 
-                f"Date: {article['publishedAt']}\n" 
-                f"Description: {article['description']}\n" 
-                f"URL: {article['url']}"
-                for article in articles['articles']
-            )
+            # Format articles with content for Gemini
+            formatted_articles = []
+            for article in articles['articles']:
+                logger.info(f"Scraping content from: {article['url']}")
+                content = self.scrape_article_content(article['url'])
+                if content:
+                    formatted_articles.append(
+                        f"Title: {article['title']}\n" 
+                        f"Date: {article['publishedAt']}\n" 
+                        f"Content:\n{content}\n"
+                    )
+            
+            if not formatted_articles:
+                return "Could not retrieve content from any articles."
+            
+            articles_text = "\n---\n".join(formatted_articles)
             
             # Send to Gemini for summarization
             logger.info("Sending articles to Gemini for summarization...")
             query = f"""
-            You are a professional news anchor specializing in AI and music news. Here are news articles from the past 2 days.
-            Please create a natural, engaging summary following these guidelines:
+Summarize the following articles about AI and music news. Important requirements:
 
-            1. Only summarize articles that discuss BOTH AI and music technology (not just one topic)
-            2. Skip duplicate news events - if multiple articles cover the same story, only summarize it once
-            3. Present each summary in a conversational style as if speaking to a YouTube audience
-            4. Include the exact publishing date in mm-dd-yyyy format for each summary
-            5. If no articles discuss both AI and music, simply state that there's no relevant news
-            6. Focus on factual reporting while maintaining an engaging tone
+1. Only summarize articles that discuss BOTH AI and music - skip others
+2. Professional tone - no YouTube-style enthusiasm
+3. No source attribution (don't say "According to...") 
+4. No meta-references (don't say "This article...")
+5. One concise paragraph per relevant article
+6. Begin each summary directly with the news
+7. Skip any examples - analyze ONLY the articles provided below
 
-            Here are the articles to analyze:
+Articles to analyze:
 
-            {articles_text}
+{articles_text}
             """
             
             response = self.model.generate_content(query)
@@ -107,16 +148,37 @@ class AINewsBot:
             logger.error(f"Error in main loop: {str(e)}")
 
     def test_prompt(self):
-        """Test the news summary generation without audio."""
+        """Test the complete news summary workflow."""
         try:
-            logger.info("Testing news summary generation...")
+            logger.info("Testing complete workflow...")
+            
+            # First show raw NewsAPI results
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=2)
+            
+            articles = self.newsapi.get_everything(
+                q='AI music',
+                from_param=start_date.strftime('%Y-%m-%d'),
+                to=end_date.strftime('%Y-%m-%d'),
+                language='en',
+                sort_by='publishedAt'
+            )
+            
+            print("\nStep 1. Raw NewsAPI articles:\n")
+            for article in articles['articles']:
+                print(f"Title: {article['title']}")
+                print(f"Date: {article['publishedAt']}")
+                print(f"URL: {article['url']}")
+                print("---")
+            
+            print("\nStep 2. Getting Gemini summary...\n")
             summary = self.get_news_summary()
             if summary:
-                print("\nGenerated Summary:\n")
                 print(summary)
-                print("\nTest completed successfully!")
+                print("\nWorkflow completed successfully!")
             else:
                 logger.error("Failed to generate summary")
+            
         except Exception as e:
             logger.error(f"Error in test_prompt: {str(e)}")
 
