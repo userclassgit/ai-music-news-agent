@@ -14,8 +14,8 @@ This AI agent autonomously
 
 - **NewsAPI**: Fetches recent news articles about AI and music
 - **BeautifulSoup4**: Scrapes the full content from each news article
-- **Google Gemini**: Summarizes articles with a professional tone and consistent format
-- **ElevenLabs**: Converts text summaries into natural-sounding audio narration using Bill's voice
+- **Gemini 2.0 Flash Thinking Experimental 01-21 API**: Summarizes articles with a professional tone and consistent format
+- **ElevenLabs API**: Converts text summaries into natural-sounding audio narration.
 
 ## Learn More
 
