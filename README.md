@@ -2,10 +2,7 @@
 
 ## Audio Demo
 
-<audio controls>
-  <source src="https://raw.githubusercontent.com/userclassgit/ai-music-news-agent/main/demo/demo.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+[🔊 Listen to or download the audio demo](https://raw.githubusercontent.com/userclassgit/ai-music-news-agent/main/demo/demo.mp3)
 
 ## What it Does
 
