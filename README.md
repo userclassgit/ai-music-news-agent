@@ -2,7 +2,7 @@
 
 ## Audio Demo
 
-[🔊 Listen to or download the audio demo](https://raw.githubusercontent.com/userclassgit/ai-music-news-agent/main/demo/demo.mp3)
+[🔊 Listen to the audio demo on our demo page](https://userclassgit.github.io/ai-music-news-agent/)
 
 ## What it Does
 
