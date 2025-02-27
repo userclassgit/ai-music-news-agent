@@ -3,7 +3,7 @@
 ## Audio Demo
 
 <audio controls>
-  <source src="demo/demo.mp3" type="audio/mpeg">
+  <source src="https://raw.githubusercontent.com/userclassgit/ai-music-news-agent/main/demo/demo.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
 
