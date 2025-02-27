@@ -1,6 +1,11 @@
 # AI Music News Audio Generator
 
-[Listen to the Audio Demo](https://www.notion.so/mj-project-journal/AI-Content-Creator-184c218ccd1880c7b608ceccc4f2cddc?pvs=97#1a1c218ccd1880fe9e7fc66eaa351cea)
+## Audio Demo
+
+<audio controls>
+  <source src="demo/demo.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 
 ## What it Does
 
