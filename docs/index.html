@@ -5,53 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Music News Audio Demo</title>
     <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --heading-color: #bb86fc;
+            --accent-color: #03dac6;
+            --button-bg: #bb86fc;
+            --button-hover: #9d65f9;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        h1 {
-            color: #2c3e50;
+
+        h1, h2 {
+            color: var(--heading-color);
+            text-align: center;
+            margin-bottom: 1.5rem;
         }
+
         .demo-container {
             margin: 30px 0;
-            padding: 20px;
-            background-color: #f7f7f7;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
         audio {
             width: 100%;
-            margin: 20px 0;
+            margin: 25px 0;
+            border-radius: 12px;
         }
+
         .button {
             display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
+            background-color: var(--button-bg);
+            color: #000000;
+            padding: 12px 24px;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 8px;
             font-weight: bold;
             margin-top: 20px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        p {
+            text-align: center;
+            margin: 1.5rem 0;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+            .demo-container {
+                padding: 20px;
+                margin: 15px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>AI Music News Audio Demo</h1>
-    
-    <div class="demo-container">
-        <h2>Listen to Generated Audio</h2>
-        <p>This is an example of AI-generated audio summarizing recent music news articles.</p>
+    <div class="container">
+        <h1>AI Music News Audio Demo</h1>
         
-        <audio controls>
-            <source src="demo.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-        
-        <p><a class="button" href="https://github.com/userclassgit/ai-music-news-agent">View Project on GitHub</a></p>
+        <div class="demo-container">
+            <h2>Listen to Generated Audio</h2>
+            <p>Experience AI-generated summaries of the latest music news, narrated with natural-sounding voice synthesis.</p>
+            
+            <audio controls>
+                <source src="demo.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <p><a class="button" href="https://github.com/userclassgit/ai-music-news-agent">View Project on GitHub</a></p>
+        </div>
     </div>
 </body>
 </html>
